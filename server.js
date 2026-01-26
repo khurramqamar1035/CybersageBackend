@@ -1,0 +1,137 @@
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import OpenAI from "openai";
+import nodemailer from "nodemailer";
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 5001;
+
+/* =================================
+   🔥 EXPRESS 5 PREFLIGHT FIX
+================================= */
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
+    return res.sendStatus(204);
+  }
+  next();
+});
+
+/* =================================
+   CORS (POST REQUESTS)
+================================= */
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+
+/* =================================
+   BODY PARSER
+================================= */
+app.use(express.json());
+
+/* =================================
+   OPENAI CLIENT
+================================= */
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+/* =================================
+   CHAT ENDPOINT
+================================= */
+app.post("/api/chat", async (req, res) => {
+  try {
+    let { messages, questionCount } = req.body;
+
+    if (!Array.isArray(messages)) messages = [];
+    if (typeof questionCount !== "number") questionCount = 0;
+
+    if (questionCount >= 3) {
+      return res.json({
+        reply:
+          "🔒 You've reached the free AI limit.\n\nClick below to contact our team.",
+        limitReached: true,
+      });
+    }
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are CyberSage AI, a professional cybersecurity assistant.",
+        },
+        ...messages,
+      ],
+      temperature: 0.4,
+      max_tokens: 500,
+    });
+
+    res.json({
+      reply: completion.choices[0].message.content,
+      limitReached: false,
+    });
+  } catch (err) {
+    console.error("Chat Error:", err);
+    res.status(500).json({ error: "AI response failed" });
+  }
+});
+
+/* =================================
+   CONTACT FORM
+================================= */
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { firstName, lastName, email, enquiry } = req.body;
+
+    if (!firstName || !lastName || !email || !enquiry) {
+      return res.status(400).json({ error: "Missing fields" });
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"CyberSage AI" <${process.env.MAIL_USER}>`,
+      to: process.env.MAIL_USER,
+      subject: "New CyberSage Enquiry",
+      text: enquiry,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Mail Error:", err);
+    res.status(500).json({ error: "Mail failed" });
+  }
+});
+
+/* =================================
+   ROOT
+================================= */
+app.get("/", (_, res) => {
+  res.send("CyberSage AI backend running 🚀");
+});
+
+/* =================================
+   START SERVER
+================================= */
+app.listen(port, () => {
+  console.log(`✅ Backend running on http://localhost:${port}`);
+});
