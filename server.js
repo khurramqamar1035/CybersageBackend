@@ -2,54 +2,40 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5001;
 
-/* =================================
-   🔥 EXPRESS 5 PREFLIGHT FIX
-================================= */
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-    res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization"
-    );
-    return res.sendStatus(204);
-  }
-  next();
-});
+/* ================================
+   MIDDLEWARE
+================================ */
+app.use(express.json());
 
-/* =================================
-   CORS
-================================= */
 app.use(
   cors({
-    origin: true, // allow all origins, or specify your frontend URL
+    origin: true,
     credentials: true,
   })
 );
 
-/* =================================
-   BODY PARSER
-================================= */
-app.use(express.json());
-
-/* =================================
+/* ================================
    OPENAI CLIENT
-================================= */
+================================ */
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-/* =================================
-   CHAT ENDPOINT
-================================= */
+/* ================================
+   RESEND CLIENT
+================================ */
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+/* ================================
+   CHAT API
+================================ */
 app.post("/api/chat", async (req, res) => {
   try {
     let { messages, questionCount } = req.body;
@@ -89,58 +75,47 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-/* =================================
-   CONTACT FORM (GMAIL)
-================================= */
+/* ================================
+   CONTACT FORM (RESEND)
+================================ */
 app.post("/api/contact", async (req, res) => {
   try {
     const { firstName, lastName, email, enquiry } = req.body;
-    console.log("hello");
 
     if (!firstName || !lastName || !email || !enquiry) {
       return res.status(400).json({ error: "Missing fields" });
     }
 
-    // Use environment variables for mail credentials
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.MAIL_USER, // your Gmail address
-        pass: process.env.MAIL_PASS, // Gmail app password
-      },
-    });
-    
-    console.log(process.env.MAIL_USER);
-    console.log (process.env.MAIL_PASS);
-
-    const mailOptions = {
-      from: `"CyberSage AI" <${process.env.MAIL_USER}>`,
-      to: process.env.MAIL_USER,
+    await resend.emails.send({
+      from: process.env.MAIL_FROM,
+      to: process.env.MAIL_TO,
       subject: "New CyberSage Enquiry",
-      text: `Name: ${firstName} ${lastName}\nEmail: ${email}\nEnquiry: ${enquiry}`,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-
-    console.log("Mail sent:", info.response);
+      html: `
+        <h3>New Enquiry</h3>
+        <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${enquiry}</p>
+      `,
+    });
 
     res.json({ success: true });
   } catch (err) {
-    console.error("Mail Error Full:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Resend Error:", err);
+    res.status(500).json({ error: "Email failed" });
   }
 });
 
-/* =================================
+/* ================================
    ROOT
-================================= */
+================================ */
 app.get("/", (_, res) => {
   res.send("CyberSage AI backend running 🚀");
 });
 
-/* =================================
+/* ================================
    START SERVER
-================================= */
+================================ */
 app.listen(port, () => {
   console.log(`✅ Backend running on port ${port}`);
 });
