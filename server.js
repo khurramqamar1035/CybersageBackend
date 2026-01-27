@@ -26,11 +26,11 @@ app.use((req, res, next) => {
 });
 
 /* =================================
-   CORS (POST REQUESTS)
+   CORS
 ================================= */
 app.use(
   cors({
-    origin: true,
+    origin: true, // allow all origins, or specify your frontend URL
     credentials: true,
   })
 );
@@ -90,7 +90,7 @@ app.post("/api/chat", async (req, res) => {
 });
 
 /* =================================
-   CONTACT FORM
+   CONTACT FORM (GMAIL)
 ================================= */
 app.post("/api/contact", async (req, res) => {
   try {
@@ -100,25 +100,30 @@ app.post("/api/contact", async (req, res) => {
       return res.status(400).json({ error: "Missing fields" });
     }
 
+    // Use environment variables for mail credentials
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
+        user: process.env.MAIL_USER, // your Gmail address
+        pass: process.env.MAIL_PASS, // Gmail app password
       },
     });
 
-    await transporter.sendMail({
+    const mailOptions = {
       from: `"CyberSage AI" <${process.env.MAIL_USER}>`,
       to: process.env.MAIL_USER,
       subject: "New CyberSage Enquiry",
-      text: enquiry,
-    });
+      text: `Name: ${firstName} ${lastName}\nEmail: ${email}\nEnquiry: ${enquiry}`,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log("Mail sent:", info.response);
 
     res.json({ success: true });
   } catch (err) {
-    console.error("Mail Error:", err);
-    res.status(500).json({ error: "Mail failed" });
+    console.error("Mail Error Full:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -133,5 +138,5 @@ app.get("/", (_, res) => {
    START SERVER
 ================================= */
 app.listen(port, () => {
-  console.log(`✅ Backend running on http://localhost:${port}`);
+  console.log(`✅ Backend running on port ${port}`);
 });
