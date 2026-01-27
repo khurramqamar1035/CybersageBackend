@@ -95,6 +95,7 @@ app.post("/api/chat", async (req, res) => {
 app.post("/api/contact", async (req, res) => {
   try {
     const { firstName, lastName, email, enquiry } = req.body;
+    console.log("hello");
 
     if (!firstName || !lastName || !email || !enquiry) {
       return res.status(400).json({ error: "Missing fields" });
