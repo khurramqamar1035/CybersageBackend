@@ -109,6 +109,9 @@ app.post("/api/contact", async (req, res) => {
         pass: process.env.MAIL_PASS, // Gmail app password
       },
     });
+    
+    console.log(process.env.MAIL_USER);
+    console.log (process.env.MAIL_PASS);
 
     const mailOptions = {
       from: `"CyberSage AI" <${process.env.MAIL_USER}>`,
