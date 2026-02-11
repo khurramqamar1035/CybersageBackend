@@ -3,8 +3,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import OpenAI from "openai";
 import { Resend } from "resend";
+import connectDB from "./config/db.js";
+import blogRoutes from "./routes/blogroutes.js";
+import faqRoutes from "./routes/faqroutes.js";
+import adminRoutes from "./routes/adminroutes.js";
+import aboutRoutes from "./routes/aboutroutes.js";
+
 
 dotenv.config();
+connectDB();
+
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -20,6 +28,16 @@ app.use(
     credentials: true,
   })
 );
+
+app.use("/api/blogs",blogRoutes);
+app.use("/api/faq",faqRoutes);
+app.use("/api/admin",adminRoutes);
+app.use("/api/about",aboutRoutes);
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 
 /* ================================
    OPENAI CLIENT
