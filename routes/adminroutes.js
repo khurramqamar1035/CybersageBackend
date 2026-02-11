@@ -1,5 +1,5 @@
 import express from "express";
-import { adminLogin } from "../controllers/adminController.js";
+import { adminLogin } from "../controllers/admincontroller.js";
 import { adminLoginValidator } from "../validators/adminschema.js";
 import validate from "../middlewares/validate.js";
 import { verifyAdmin } from "../middlewares/verifyadmin.js";
