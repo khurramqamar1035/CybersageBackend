@@ -2,7 +2,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { sendVerificationEmail } from "../utils/SendEmail.js";
+import { sendVerificationEmail } from "../utils/sendEmail.js";
 
 export const login = async (req, res) => {
   try {
