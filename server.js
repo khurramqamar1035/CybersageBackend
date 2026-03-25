@@ -8,6 +8,9 @@ import blogRoutes from "./routes/blogroutes.js";
 import faqRoutes from "./routes/faqroutes.js";
 import adminRoutes from "./routes/adminroutes.js";
 import aboutRoutes from "./routes/aboutroutes.js";
+import authRoutes from "./routes/authroutes.js";
+
+
 
 
 dotenv.config();
@@ -31,6 +34,7 @@ app.use(
 
 app.use("/api/blogs",blogRoutes);
 app.use("/api/faq",faqRoutes);
+
 app.use("/api/admin",adminRoutes);
 app.use("/api/about",aboutRoutes);
 app.use((req, res, next) => {
@@ -38,7 +42,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
+app.use("/api/auth", authRoutes);
 /* ================================
    OPENAI CLIENT
 ================================ */
@@ -49,7 +53,7 @@ const openai = new OpenAI({
 /* ================================
    RESEND CLIENT
 ================================ */
-const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 /* ================================
    CHAT API
@@ -103,6 +107,7 @@ app.post("/api/contact", async (req, res) => {
     if (!firstName || !lastName || !email || !enquiry) {
       return res.status(400).json({ error: "Missing fields" });
     }
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
       from: process.env.MAIL_FROM,
