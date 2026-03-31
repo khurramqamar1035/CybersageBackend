@@ -20,5 +20,6 @@ router.post(
   validate(loginSchema), // Use Joi login schema
   login
 );
+router.get('/verify-email/:token', verifyEmail);
 
 export default router;

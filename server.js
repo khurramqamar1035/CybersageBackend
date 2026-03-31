@@ -1,6 +1,6 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import OpenAI from "openai";
 import { Resend } from "resend";
 import connectDB from "./config/db.js";
@@ -9,11 +9,12 @@ import faqRoutes from "./routes/faqroutes.js";
 import adminRoutes from "./routes/adminroutes.js";
 import aboutRoutes from "./routes/aboutroutes.js";
 import authRoutes from "./routes/authroutes.js";
+import serviceRoutes from "./routes/serviceroutes.js"
 
 
 
 
-dotenv.config();
+
 connectDB();
 
 
@@ -37,6 +38,7 @@ app.use("/api/faq",faqRoutes);
 
 app.use("/api/admin",adminRoutes);
 app.use("/api/about",aboutRoutes);
+app.use('/api/services', serviceRoutes);
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
