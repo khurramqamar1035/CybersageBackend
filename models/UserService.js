@@ -14,6 +14,11 @@ const userServiceSchema = new mongoose.Schema(
       enum: ["Unpaid", "Paid"],
       default: "Unpaid",
     },
+    paymentType: {
+      type: String,
+      enum: ["one-time", "monthly"],
+      default: "one-time",
+    },
     price: { type: Number, default: 0 },
     deliveryDate: { type: Date, default: null },
     riskLevel: {
@@ -21,6 +26,10 @@ const userServiceSchema = new mongoose.Schema(
       enum: ["Low", "Medium", "High"],
       default: "Low",
     },
+    stripePaymentIntentId: { type: String, default: null },
+    stripeSubscriptionId: { type: String, default: null },
+    invoiceUrl: { type: String, default: null },
+    invoiceDate: { type: Date, default: null },
   },
   { timestamps: true }
 );

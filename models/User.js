@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema(
     // Array of references to Service model
     services: [
       { type: mongoose.Schema.Types.ObjectId, ref: "Service" }
-    ]
+    ],
+    stripeCustomerId: { type: String, default: null },
   },
   { timestamps: true }
 );
