@@ -37,3 +37,43 @@ export const sendVerificationEmail = async (to, token) => {
   await emailApi.sendTransacEmail(sendSmtpEmail);
   console.log("[EMAIL] Verification email sent to:", to);
 };
+
+export const sendServiceRequestEmail = async ({ userName, companyName, email, serviceName }) => {
+  console.log("[EMAIL] Sending service request email to admin...");
+
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+  sendSmtpEmail.sender = { name: "CyberSage", email: process.env.BREVO_SENDER_EMAIL };
+  sendSmtpEmail.to = [{ email: "cybersageuk@gmail.com" }];
+  sendSmtpEmail.subject = `New Service Request — ${serviceName}`;
+  sendSmtpEmail.htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #2563eb;">New Service Request</h2>
+      <p>A client has requested a new service. Here are their details:</p>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 16px;">
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; font-weight: bold; color: #475569;">Name</td>
+          <td style="padding: 12px; color: #1e293b;">${userName}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; font-weight: bold; color: #475569;">Company</td>
+          <td style="padding: 12px; color: #1e293b;">${companyName}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; font-weight: bold; color: #475569;">Email</td>
+          <td style="padding: 12px; color: #1e293b;">${email}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e2e8f0;">
+          <td style="padding: 12px; font-weight: bold; color: #475569;">Requested Service</td>
+          <td style="padding: 12px; color: #2563eb; font-weight: bold;">${serviceName}</td>
+        </tr>
+      </table>
+      <p style="margin-top: 24px; color: #64748b; font-size: 14px;">
+        Please follow up with this client to discuss pricing and next steps.
+      </p>
+    </div>
+  `;
+
+  await emailApi.sendTransacEmail(sendSmtpEmail);
+  console.log("[EMAIL] Service request email sent successfully");
+};

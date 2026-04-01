@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { sendVerificationEmail } from "../utils/sendEmail.js";
-
+import UserService from "../models/UserService.js";
 // ------------------ REGISTER ------------------
 export const register = async (req, res) => {
   try {
@@ -81,6 +81,16 @@ export const register = async (req, res) => {
       verificationToken: user.verificationToken,
       verificationTokenExpires: user.verificationTokenExpires,
     });
+
+    for (const serviceId of validServiceIds) {
+      await UserService.create({
+        user: user._id,
+        service: serviceId,
+        paymentStatus: "Unpaid",
+        status: "Pending",
+      });
+    }
+    console.log("[REGISTER] UserService entries created for:", validServiceIds);
 
     // Send verification email
     try {
