@@ -13,7 +13,7 @@ import serviceRoutes from "./routes/serviceroutes.js"
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import myServicesRoutes from "./routes/myServicesRoutes.js";
 import reportsRoutes from "./routes/reportsRoutes.js";
-
+import billingRoutes from "./routes/billingRoutes.js";
 connectDB();
 
 
@@ -40,6 +40,10 @@ app.use('/api/services', serviceRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/my-services", myServicesRoutes);
 app.use("/api/reports", reportsRoutes);
+
+
+// ✅ Register billing BEFORE express.json() so webhook raw body works
+app.use("/api/billing", billingRoutes);
 
 
 app.use((req, res, next) => {
