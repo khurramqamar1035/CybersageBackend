@@ -3,7 +3,6 @@ import { adminLogin } from "../controllers/admincontroller.js";
 import { adminLoginValidator } from "../validators/adminschema.js";
 import { validate }  from "../middlewares/validate.js";
 import { verifyAdmin } from "../middlewares/verifyadmin.js";
-import express from "express";
 import { adminOnly } from "../middlewares/authMiddleware.js";
 import {
   getAllCompanies, getCompany, updateUser, deleteUser,
