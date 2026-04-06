@@ -24,9 +24,14 @@ export const adminLogin = (req, res) => {
 // ------------------ GET ALL COMPANIES ------------------
 export const getAllCompanies = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" })
-      .select("-password -verificationToken")
-      .populate("services");
+    const users = await User.find({
+      $or: [
+        { role: "user" },       // explicitly has role user
+        { role: { $exists: false } } // or role field doesn't exist
+      ]
+    })
+    .select("-password -verificationToken")
+    .populate("services");
 
     const companiesWithStats = await Promise.all(
       users.map(async (user) => {
