@@ -115,3 +115,27 @@ export const adminUpdateUserService = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+export const requestPricing = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { serviceId } = req.body;
+
+    const user = await User.findById(userId);
+    const service = await Service.findById(serviceId);
+
+    if (!user || !service) return res.status(404).json({ message: "Not found" });
+
+    await sendPricingRequestEmail({
+      userName: user.name,
+      companyName: user.companyName,
+      email: user.email,
+      serviceName: service.name,
+    });
+
+    res.json({ message: "Pricing request sent successfully" });
+  } catch (err) {
+    console.error("[REQUEST PRICING] Error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
