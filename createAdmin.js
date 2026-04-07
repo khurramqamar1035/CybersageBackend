@@ -7,12 +7,12 @@ dotenv.config();
 
 await mongoose.connect(process.env.MONGO_URI);
 
-const hashedPassword = await bcrypt.hash("peeyush2198", 12);
+const hashedPassword = await bcrypt.hash("asdfghjklmn", 12);
 
 await User.create({
   name: "Admin",
   companyName: "CyberSage",
-  email: "peeyushk2198@gmail.com",
+  email: "@gmail.com",
   password: hashedPassword,
   role: "admin",
   isVerified: true,
