@@ -3,7 +3,6 @@ import UserService from "../models/UserService.js";
 import Report from "../models/Report.js";
 import DashboardData from "../models/DashboardData.js";
 import Service from "../models/ServiceModel.js";
-import bcrypt from "bcryptjs";
 
 
 const ADMIN_USERNAME = "admin";
