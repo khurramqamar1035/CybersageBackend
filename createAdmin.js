@@ -12,7 +12,7 @@ const hashedPassword = await bcrypt.hash("asdfghjklmn", 12);
 await User.create({
   name: "Admin",
   companyName: "CyberSage",
-  email: "@gmail.com",
+  email: "khurramqamar356@gmail.com",
   password: hashedPassword,
   role: "admin",
   isVerified: true,
