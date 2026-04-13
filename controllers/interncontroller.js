@@ -27,14 +27,19 @@ const STATUS_META = {
 // ─── Apply for internship ─────────────────────────────────────────────────────
 export const applyInternship = async (req, res) => {
   try {
-    const { name, email, phone, degree, universityYear, university } = req.body;
+    const { name, email, phone, degree, universityYear, university, skills } = req.body;
 
     if (!name || !email || !phone || !degree || !universityYear) {
       return res.status(400).json({ error: "All required fields must be filled." });
     }
 
+    // Sanitise skills — ensure it's an array of non-empty strings, max 12
+    const cleanSkills = Array.isArray(skills)
+      ? skills.map(s => String(s).trim()).filter(Boolean).slice(0, 12)
+      : [];
+
     // Save to DB
-    const intern = await Intern.create({ name, email, phone, degree, universityYear, university });
+    const intern = await Intern.create({ name, email, phone, degree, universityYear, university, skills: cleanSkills });
 
     // 1️⃣  Notify admin
     try {
@@ -70,6 +75,11 @@ export const applyInternship = async (req, res) => {
               <tr style="border-bottom:1px solid #e2e8f0;">
                 <td style="padding:12px;font-weight:bold;color:#475569;">University</td>
                 <td style="padding:12px;color:#1e293b;">${university}</td>
+              </tr>` : ''}
+            ${cleanSkills.length > 0 ? `
+              <tr style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:12px;font-weight:bold;color:#475569;vertical-align:top;">Skills</td>
+                <td style="padding:12px;color:#1e293b;">${cleanSkills.map(s => `<span style="display:inline-block;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:4px;padding:2px 8px;font-size:12px;margin:2px;">${s}</span>`).join(' ')}</td>
               </tr>` : ''}
               <tr>
                 <td style="padding:12px;font-weight:bold;color:#475569;">Applied At</td>
@@ -129,10 +139,15 @@ export const applyInternship = async (req, res) => {
                   <td style="padding:10px 12px;color:#64748b;font-weight:600;">University</td>
                   <td style="padding:10px 12px;color:#1e293b;">${university}</td>
                 </tr>` : ''}
-                <tr>
+                <tr style="${cleanSkills.length > 0 ? 'border-bottom:1px solid #e2e8f0;' : ''}">
                   <td style="padding:10px 12px;color:#64748b;font-weight:600;">Year of Study</td>
                   <td style="padding:10px 12px;color:#1e293b;">${universityYear}</td>
                 </tr>
+                ${cleanSkills.length > 0 ? `
+                <tr>
+                  <td style="padding:10px 12px;color:#64748b;font-weight:600;vertical-align:top;">Skills</td>
+                  <td style="padding:10px 12px;">${cleanSkills.map(s => `<span style="display:inline-block;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:4px;padding:2px 8px;font-size:12px;margin:2px;">${s}</span>`).join(' ')}</td>
+                </tr>` : ''}
               </table>
 
               <p style="margin-top:28px;color:#334155;font-size:15px;line-height:1.6;">

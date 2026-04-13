@@ -9,6 +9,7 @@ const InternSchema = new mongoose.Schema({
   degree:           { type: String, required: true, trim: true },
   universityYear:   { type: String, required: true },
   university:       { type: String, trim: true, default: null },
+  skills:           { type: [String], default: [] },
   status:           { type: String, enum: ['pending', 'reviewed', 'accepted', 'rejected'], default: 'pending' },
   statusUpdatedAt:  { type: Date, default: null },
   applied_at:       { type: Date, default: Date.now },
