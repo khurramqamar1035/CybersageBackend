@@ -1,19 +1,13 @@
-import express from 'express';
-import {
-  createService,
-  getServices,
-  getServiceById,
-  updateService,
-  deleteService
-} from '../controllers/servicecontroller.js';
+import express from "express";
+import { createService, getServices, getServiceById, updateService, deleteService } from "../controllers/servicecontroller.js";
+import { adminOnly } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// CRUD routes
-router.post('/', createService);        // Create
-router.get('/', getServices);           // Get all
-router.get('/:id', getServiceById);     // Get one
-router.put('/:id', updateService);      // Update
-router.delete('/:id', deleteService);   // Delete
+router.get("/", getServices);                           // Public — read
+router.get("/:id", getServiceById);                     // Public — read
+router.post("/", adminOnly, createService);             // Admin only
+router.put("/:id", adminOnly, updateService);           // Admin only
+router.delete("/:id", adminOnly, deleteService);        // Admin only
 
 export default router;

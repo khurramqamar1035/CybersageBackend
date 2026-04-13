@@ -4,6 +4,7 @@ import cors from "cors";
 import OpenAI from "openai";
 import { Resend } from "resend";
 import connectDB from "./config/db.js";
+import { chatLimiter, publicWriteLimiter } from "./middlewares/rateLimiter.js";
 import blogRoutes from "./routes/blogroutes.js";
 import faqRoutes from "./routes/faqroutes.js";
 import adminRoutes from "./routes/adminroutes.js";
@@ -19,21 +20,63 @@ import clientRoutes from "./routes/clientroutes.js";
 import internRoutes from "./routes/internroutes.js";
 connectDB();
 
-
 const app = express();
 const port = process.env.PORT || 5001;
 
 /* ================================
-   MIDDLEWARE
+   SECURITY HEADERS (manual helmet)
 ================================ */
-app.use(express.json());
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "geolocation=(), camera=(), microphone=()");
+  res.setHeader(
+    "Strict-Transport-Security",
+    "max-age=63072000; includeSubDomains; preload"
+  );
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' https:; connect-src 'self'"
+  );
+  // Remove header that reveals Express
+  res.removeHeader("X-Powered-By");
+  next();
+});
+
+/* ================================
+   CORS — explicit allowlist only
+================================ */
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+// Fallback for development
+if (ALLOWED_ORIGINS.length === 0) {
+  ALLOWED_ORIGINS.push("http://localhost:3000");
+}
 
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      // Allow server-to-server / curl in dev (no origin header)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-admin-key"],
   })
 );
+
+/* ================================
+   BODY SIZE LIMIT
+================================ */
+app.use(express.json({ limit: "50kb" }));
+app.use(express.urlencoded({ extended: true, limit: "50kb" }));
 
 app.use("/api/blogs",blogRoutes);
 app.use("/api/faq",faqRoutes);
@@ -52,11 +95,6 @@ app.use("/api/interns", internRoutes);
 app.use("/api/billing", billingRoutes);
 
 
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-
 app.use("/api/auth", authRoutes);
 /* ================================
    OPENAI CLIENT
@@ -73,7 +111,7 @@ const openai = new OpenAI({
 /* ================================
    CHAT API
 ================================ */
-app.post("/api/chat", async (req, res) => {
+app.post("/api/chat", chatLimiter, async (req, res) => {
   try {
     let { messages, questionCount } = req.body;
 
@@ -107,7 +145,7 @@ app.post("/api/chat", async (req, res) => {
       limitReached: false,
     });
   } catch (err) {
-    console.error("Chat Error:", err);
+    console.error("[CHAT]", err.message);
     res.status(500).json({ error: "AI response failed" });
   }
 });
@@ -115,7 +153,7 @@ app.post("/api/chat", async (req, res) => {
 /* ================================
    CONTACT FORM (RESEND)
 ================================ */
-app.post("/api/contact", async (req, res) => {
+app.post("/api/contact", publicWriteLimiter, async (req, res) => {
   try {
     const { firstName, lastName, email, enquiry } = req.body;
 
@@ -139,21 +177,57 @@ app.post("/api/contact", async (req, res) => {
 
     res.json({ success: true });
   } catch (err) {
-    console.error("Resend Error:", err);
+    console.error("[CONTACT]", err.message);
     res.status(500).json({ error: "Email failed" });
   }
 });
 
 /* ================================
-   ROOT
+   ROOT — no version/tech disclosure
 ================================ */
-app.get("/", (_, res) => {
-  res.send("CyberSage AI backend running 🚀");
+app.get("/", (_, res) => res.status(200).json({ status: "ok" }));
+
+/* ================================
+   404 handler
+================================ */
+app.use((req, res) => {
+  res.status(404).json({ message: "Not found" });
+});
+
+/* ================================
+   GLOBAL ERROR HANDLER
+   Never expose stack traces or
+   raw error messages in production
+================================ */
+app.use((err, req, res, next) => { // eslint-disable-line no-unused-vars
+  // Log full details server-side only
+  console.error(`[ERROR] ${req.method} ${req.path}:`, err.message);
+
+  // CORS errors
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  // JSON parse errors
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ message: "Invalid request body" });
+  }
+
+  // Payload too large
+  if (err.status === 413) {
+    return res.status(413).json({ message: "Request too large" });
+  }
+
+  // Never send stack traces or raw err.message to clients
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    message: status < 500 ? err.message : "An unexpected error occurred",
+  });
 });
 
 /* ================================
    START SERVER
 ================================ */
 app.listen(port, () => {
-  console.log(`✅ Backend running on port ${port}`);
+  console.log(`Backend running on port ${port}`);
 });

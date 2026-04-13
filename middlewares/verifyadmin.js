@@ -1,16 +1,22 @@
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "cybersage_admin_2024_secure_token";
+// Legacy middleware — kept for backward compatibility only.
+// New routes should use adminOnly from authMiddleware.js instead.
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 
 export const verifyAdmin = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  if (!ADMIN_TOKEN) {
+    // Fail closed — never fall back to a hardcoded default
+    console.error("[SECURITY] ADMIN_TOKEN env variable is not set");
+    return res.status(503).json({ message: "Service unavailable" });
+  }
 
+  const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Missing authentication token" });
+    return res.status(401).json({ message: "Not authorized" });
   }
 
   const token = authHeader.split(" ")[1];
-
   if (token !== ADMIN_TOKEN) {
-    return res.status(403).json({ message: "Invalid authentication token" });
+    return res.status(403).json({ message: "Forbidden" });
   }
 
   next();

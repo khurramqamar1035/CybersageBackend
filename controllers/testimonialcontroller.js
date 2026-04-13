@@ -10,7 +10,7 @@ export const createTestimonial = async (req, res) => {
     const testimonial = await Testimonial.create(data);
     res.status(201).json(testimonial);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
 
@@ -21,9 +21,6 @@ export const getTestimonials = async (req, res) => {
 
 export const updateTestimonial = async (req, res) => {
   try {
-    console.log("update testimonial hit ----------");
-    console.log("UUID:", req.params.id);
-
     const data = testimonialUpdateSchema.parse(req.body);
 
     const testimonial = await Testimonial.findOneAndUpdate(
@@ -42,15 +39,13 @@ export const updateTestimonial = async (req, res) => {
 
     res.json(testimonial);
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: err.message });
+    console.error("[TESTIMONIAL]", err.message);
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
 
 export const deleteTestimonial = async (req, res) => {
   try {
-    console.log("delete testimonial hit ----------");
-    console.log("UUID:", req.params.id);
 
     const testimonial = await Testimonial.findOneAndDelete({
       id: req.params.id, // UUID field
@@ -62,7 +57,7 @@ export const deleteTestimonial = async (req, res) => {
 
     res.json({ message: "Testimonial deleted successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: err.message });
+    console.error("[TESTIMONIAL]", err.message);
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };

@@ -5,9 +5,6 @@ defaultClient.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
 
 const emailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
-console.log('[EMAIL] BREVO_API_KEY:', process.env.BREVO_API_KEY ? '[SET]' : '[MISSING]');
-console.log('[EMAIL] BREVO_SENDER_EMAIL:', process.env.BREVO_SENDER_EMAIL ? '[SET]' : '[MISSING]');
-
 export const sendVerificationEmail = async (to, token) => {
   const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${token}`;
 

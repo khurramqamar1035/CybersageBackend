@@ -10,7 +10,7 @@ export const createFAQ = async (req, res) => {
     const faq = await FAQ.create(data);
     res.status(201).json(faq);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
 
@@ -21,9 +21,6 @@ export const getFAQs = async (req, res) => {
 
 export const updateFAQ = async (req, res) => {
   try {
-    console.log("update faq hit ----------");
-    console.log("UUID:", req.params.id);
-
     const data = faqUpdateSchema.parse(req.body);
 
     const faq = await FAQ.findOneAndUpdate(
@@ -43,16 +40,14 @@ export const updateFAQ = async (req, res) => {
 
     res.json(faq);
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: err.message });
+    console.error("[FAQ]", err.message);
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
 
 
 export const deleteFAQ = async (req, res) => {
   try {
-    console.log("delete faq hit ----------");
-    console.log("UUID:", req.params.id);
 
     const faq = await FAQ.findOneAndDelete({
       id: req.params.id, // UUID field
@@ -64,7 +59,7 @@ export const deleteFAQ = async (req, res) => {
 
     res.json({ message: "FAQ deleted successfully" });
   } catch (err) {
-    console.error(err);
-    res.status(400).json({ error: err.message });
+    console.error("[FAQ]", err.message);
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };

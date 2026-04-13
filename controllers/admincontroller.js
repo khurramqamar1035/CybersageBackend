@@ -5,14 +5,12 @@ import DashboardData from "../models/DashboardData.js";
 import Service from "../models/ServiceModel.js";
 
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "cybersage2024";
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "cybersage_admin_2024_secure_token";
 
 export const adminLogin = (req, res) => {
   const { username, password } = req.body;
 
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+  if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
     return res.json({ token: ADMIN_TOKEN, message: "Login successful" });
   }
 
@@ -51,8 +49,8 @@ export const getAllCompanies = async (req, res) => {
 
     res.json(companiesWithStats);
   } catch (err) {
-    console.error("[ADMIN] getAllCompanies error:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -70,8 +68,8 @@ export const getCompany = async (req, res) => {
 
     res.json({ user, userServices, reports, dashboard });
   } catch (err) {
-    console.error("[ADMIN] getCompany error:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -89,7 +87,8 @@ export const updateUser = async (req, res) => {
 
     res.json({ message: "User updated", user });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -103,7 +102,8 @@ export const deleteUser = async (req, res) => {
     await DashboardData.deleteOneAndDelete({ user: userId });
     res.json({ message: "User and all data deleted" });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -121,7 +121,8 @@ export const updateDashboardStats = async (req, res) => {
 
     res.json({ message: "Dashboard updated", dashboard });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -139,7 +140,8 @@ export const updateUserService = async (req, res) => {
 
     res.json({ message: "Service updated", userService });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -170,7 +172,8 @@ export const addServiceToUser = async (req, res) => {
     const populated = await userService.populate("service", "name");
     res.status(201).json({ message: "Service added", userService: populated });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -188,7 +191,8 @@ export const removeServiceFromUser = async (req, res) => {
 
     res.json({ message: "Service removed" });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -207,7 +211,8 @@ export const createReport = async (req, res) => {
     const populated = await report.populate("service", "name");
     res.status(201).json({ message: "Report created", report: populated });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -225,7 +230,8 @@ export const updateReport = async (req, res) => {
 
     res.json({ message: "Report updated", report });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -236,7 +242,8 @@ export const deleteReport = async (req, res) => {
     await Report.findByIdAndDelete(reportId);
     res.json({ message: "Report deleted" });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
 
@@ -254,6 +261,7 @@ export const updatePaymentStatus = async (req, res) => {
 
     res.json({ message: "Payment updated", userService });
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("[ADMIN]", err.message);
+    res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
