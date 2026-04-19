@@ -92,9 +92,8 @@ export const applyInternship = async (req, res) => {
           </div>
         `,
       });
-      console.log("[INTERN] Admin notification sent to cybersageuk@gmail.com");
-    } catch (err) {
-      console.error("[INTERN] Admin email failed:", err.message);
+    } catch {
+      // email failure is non-fatal
     }
 
     // 2️⃣  Confirmation email to the applicant
@@ -164,14 +163,12 @@ export const applyInternship = async (req, res) => {
           </div>
         `,
       });
-      console.log(`[INTERN] Confirmation email sent to applicant: ${email}`);
-    } catch (err) {
-      console.error("[INTERN] Applicant confirmation email failed:", err.message);
+    } catch {
+      // email failure is non-fatal
     }
 
     res.status(201).json({ success: true, message: "Application submitted successfully.", id: intern.id });
-  } catch (err) {
-    console.error("[INTERN] Error:", err.message);
+  } catch {
     res.status(500).json({ error: "Failed to submit application." });
   }
 };
@@ -181,8 +178,8 @@ export const getInterns = async (req, res) => {
   try {
     const interns = await Intern.find().sort({ applied_at: -1 });
     res.json(interns);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch applications." });
   }
 };
 
@@ -201,8 +198,6 @@ export const updateInternStatus = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!intern) return res.status(404).json({ error: "Intern not found" });
-
-    console.log(`[INTERN] Status updated → ${intern.name}: ${status}`);
 
     // 3️⃣  Status update email to the applicant
     try {
@@ -253,14 +248,13 @@ export const updateInternStatus = async (req, res) => {
           </div>
         `,
       });
-      console.log(`[INTERN] Status update email sent to: ${intern.email} (${status})`);
-    } catch (err) {
-      console.error("[INTERN] Status email failed:", err.message);
+    } catch {
+      // email failure is non-fatal
     }
 
     res.json(intern);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  } catch {
+    res.status(400).json({ error: "Failed to update status." });
   }
 };
 
@@ -269,7 +263,7 @@ export const deleteIntern = async (req, res) => {
     const intern = await Intern.findOneAndDelete({ id: req.params.id });
     if (!intern) return res.status(404).json({ error: "Intern not found" });
     res.json({ message: "Deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch {
+    res.status(500).json({ error: "Failed to delete application." });
   }
 };
