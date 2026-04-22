@@ -49,20 +49,42 @@ app.use((req, res, next) => {
 /* ================================
    CORS — explicit allowlist only
 ================================ */
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
+const buildAllowedOrigins = () => {
+  const origins = new Set();
 
-// Fallback for development
-if (ALLOWED_ORIGINS.length === 0) {
-  ALLOWED_ORIGINS.push("http://localhost:3000");
-}
+  // 1. Explicit comma-separated list (highest priority)
+  (process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean)
+    .forEach((o) => origins.add(o));
+
+  // 2. Build from CLIENT_URL (supports bare domain or full URL)
+  const clientUrl = (process.env.CLIENT_URL || "").trim();
+  if (clientUrl) {
+    // Already has a protocol
+    if (clientUrl.startsWith("http")) {
+      origins.add(clientUrl.replace(/\/$/, ""));
+    } else {
+      // Bare domain — add both https variants
+      const bare = clientUrl.replace(/^www\./, "");
+      origins.add(`https://${bare}`);
+      origins.add(`https://www.${bare}`);
+    }
+  }
+
+  // 3. Always allow localhost for development
+  origins.add("http://localhost:3000");
+
+  return [...origins];
+};
+
+const ALLOWED_ORIGINS = buildAllowedOrigins();
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow server-to-server / curl in dev (no origin header)
+      // Allow server-to-server / curl / Render health checks (no origin header)
       if (!origin) return callback(null, true);
       if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
       callback(new Error("Not allowed by CORS"));
@@ -146,8 +168,7 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
       reply: completion.choices[0].message.content,
       limitReached: false,
     });
-  } catch (err) {
-    console.error("[CHAT]", err.message);
+  } catch {
     res.status(500).json({ error: "AI response failed" });
   }
 });
@@ -178,8 +199,7 @@ app.post("/api/contact", publicWriteLimiter, async (req, res) => {
     });
 
     res.json({ success: true });
-  } catch (err) {
-    console.error("[CONTACT]", err.message);
+  } catch {
     res.status(500).json({ error: "Email failed" });
   }
 });
