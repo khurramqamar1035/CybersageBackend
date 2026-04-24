@@ -4,8 +4,6 @@ const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 
 export const verifyAdmin = (req, res, next) => {
   if (!ADMIN_TOKEN) {
-    // Fail closed — never fall back to a hardcoded default
-    console.error("[SECURITY] ADMIN_TOKEN env variable is not set");
     return res.status(503).json({ message: "Service unavailable" });
   }
 

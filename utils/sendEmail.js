@@ -32,11 +32,9 @@ export const sendVerificationEmail = async (to, token) => {
   `;
 
   await emailApi.sendTransacEmail(sendSmtpEmail);
-  console.log("[EMAIL] Verification email sent to:", to);
 };
 
 export const sendServiceRequestEmail = async ({ userName, companyName, email, serviceName }) => {
-  console.log("[EMAIL] Sending service request email to admin...");
 
   const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
@@ -72,7 +70,6 @@ export const sendServiceRequestEmail = async ({ userName, companyName, email, se
   `;
 
   await emailApi.sendTransacEmail(sendSmtpEmail);
-  console.log("[EMAIL] Service request email sent successfully");
 };
 
 export const sendPricingRequestEmail = async ({ userName, companyName, email, serviceName }) => {
@@ -110,5 +107,4 @@ export const sendPricingRequestEmail = async ({ userName, companyName, email, se
   `;
 
   await emailApi.sendTransacEmail(sendSmtpEmail);
-  console.log("[EMAIL] Pricing request email sent for:", serviceName);
 };

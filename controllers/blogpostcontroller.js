@@ -46,7 +46,6 @@ export const updateBlog = async (req, res) => {
 
     res.json(blog);
   } catch (err) {
-    console.error("[BLOG]", err.message);
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
@@ -64,7 +63,6 @@ export const deleteBlog = async (req, res) => {
 
     res.json({ message: "Blog deleted successfully" });
   } catch (err) {
-    console.error("[BLOG]", err.message);
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };

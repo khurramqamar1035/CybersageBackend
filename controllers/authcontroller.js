@@ -55,14 +55,12 @@ export const register = async (req, res) => {
 
     try {
       await sendVerificationEmail(email, verificationToken);
-    } catch (emailErr) {
-      // Email failure is non-fatal; log server-side only
-      console.error("[REGISTER] Verification email failed:", emailErr.message);
+    } catch {
+      // Email failure is non-fatal — user can request a resend
     }
 
     res.status(201).json({ message: "Account created. Please verify your email." });
-  } catch (error) {
-    console.error("[REGISTER] Error:", error.message);
+  } catch {
     res.status(500).json({ message: "Registration failed. Please try again." });
   }
 };
@@ -116,8 +114,7 @@ export const login = async (req, res) => {
         services: user.services,
       },
     });
-  } catch (err) {
-    console.error("[LOGIN] Error:", err.message);
+  } catch {
     res.status(500).json({ message: "Login failed. Please try again." });
   }
 };
@@ -142,8 +139,7 @@ export const verifyEmail = async (req, res) => {
     await user.save();
 
     res.json({ message: "Email verified successfully. You can now log in." });
-  } catch (err) {
-    console.error("[VERIFY EMAIL] Error:", err.message);
+  } catch {
     res.status(500).json({ message: "Verification failed. Please try again." });
   }
 };

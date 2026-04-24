@@ -5,7 +5,7 @@ import DashboardData from "../models/DashboardData.js";
 import Service from "../models/ServiceModel.js";
 
 
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || "cybersage_admin_2024_secure_token";
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN;
 
 export const adminLogin = (req, res) => {
   const { username, password } = req.body;
@@ -49,7 +49,6 @@ export const getAllCompanies = async (req, res) => {
 
     res.json(companiesWithStats);
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -68,7 +67,6 @@ export const getCompany = async (req, res) => {
 
     res.json({ user, userServices, reports, dashboard });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -87,7 +85,6 @@ export const updateUser = async (req, res) => {
 
     res.json({ message: "User updated", user });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -99,10 +96,9 @@ export const deleteUser = async (req, res) => {
     await User.findByIdAndDelete(userId);
     await UserService.deleteMany({ user: userId });
     await Report.deleteMany({ user: userId });
-    await DashboardData.deleteOneAndDelete({ user: userId });
+    await DashboardData.deleteOne({ user: userId });
     res.json({ message: "User and all data deleted" });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -121,7 +117,6 @@ export const updateDashboardStats = async (req, res) => {
 
     res.json({ message: "Dashboard updated", dashboard });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -140,7 +135,6 @@ export const updateUserService = async (req, res) => {
 
     res.json({ message: "Service updated", userService });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -172,7 +166,6 @@ export const addServiceToUser = async (req, res) => {
     const populated = await userService.populate("service", "name");
     res.status(201).json({ message: "Service added", userService: populated });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -191,7 +184,6 @@ export const removeServiceFromUser = async (req, res) => {
 
     res.json({ message: "Service removed" });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -211,7 +203,6 @@ export const createReport = async (req, res) => {
     const populated = await report.populate("service", "name");
     res.status(201).json({ message: "Report created", report: populated });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -230,7 +221,6 @@ export const updateReport = async (req, res) => {
 
     res.json({ message: "Report updated", report });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -242,7 +232,6 @@ export const deleteReport = async (req, res) => {
     await Report.findByIdAndDelete(reportId);
     res.json({ message: "Report deleted" });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };
@@ -261,7 +250,6 @@ export const updatePaymentStatus = async (req, res) => {
 
     res.json({ message: "Payment updated", userService });
   } catch (err) {
-    console.error("[ADMIN]", err.message);
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 };

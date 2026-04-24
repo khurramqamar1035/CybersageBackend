@@ -38,8 +38,7 @@ export const updateClient = async (req, res) => {
     }
 
     res.json(client);
-  } catch (err) {
-    console.error("[CLIENT]", err.message);
+  } catch {
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
@@ -56,8 +55,7 @@ export const deleteClient = async (req, res) => {
     }
 
     res.json({ message: "Client deleted successfully" });
-  } catch (err) {
-    console.error("[CLIENT]", err.message);
+  } catch {
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };

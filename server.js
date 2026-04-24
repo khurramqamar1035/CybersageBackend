@@ -103,7 +103,7 @@ app.use(express.urlencoded({ extended: true, limit: "50kb" }));
 
 app.use("/api/blogs",blogRoutes);
 app.use("/api/faq",faqRoutes);
-app.use("/api/admink",adminRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/about",aboutRoutes);
 app.use('/api/services', serviceRoutes);
 app.use("/api/dashboard", dashboardRoutes);

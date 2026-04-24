@@ -38,8 +38,7 @@ export const updateTestimonial = async (req, res) => {
     }
 
     res.json(testimonial);
-  } catch (err) {
-    console.error("[TESTIMONIAL]", err.message);
+  } catch {
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
@@ -56,8 +55,7 @@ export const deleteTestimonial = async (req, res) => {
     }
 
     res.json({ message: "Testimonial deleted successfully" });
-  } catch (err) {
-    console.error("[TESTIMONIAL]", err.message);
+  } catch {
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };

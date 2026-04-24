@@ -39,8 +39,7 @@ export const updateFAQ = async (req, res) => {
     }
 
     res.json(faq);
-  } catch (err) {
-    console.error("[FAQ]", err.message);
+  } catch {
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
@@ -58,8 +57,7 @@ export const deleteFAQ = async (req, res) => {
     }
 
     res.json({ message: "FAQ deleted successfully" });
-  } catch (err) {
-    console.error("[FAQ]", err.message);
+  } catch {
     res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };

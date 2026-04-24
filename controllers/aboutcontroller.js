@@ -9,7 +9,7 @@ export const getTeamMembers = async (req, res) => {
     const members = await TeamMember.find().sort({ createdAt: 1 });
     res.json(members);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Operation failed. Please try again." });
   }
 };
 
@@ -20,7 +20,7 @@ export const createTeamMember = async (req, res) => {
     const member = await TeamMember.create(data);
     res.status(201).json(member);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
 
@@ -30,7 +30,7 @@ export const getOffices = async (req, res) => {
     const offices = await Office.find().sort({ createdAt: 1 });
     res.json(offices);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Operation failed. Please try again." });
   }
 };
 
@@ -41,6 +41,6 @@ export const createOffice = async (req, res) => {
     const office = await Office.create(data);
     res.status(201).json(office);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: "Operation failed. Please try again." });
   }
 };
