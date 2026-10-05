@@ -6,6 +6,10 @@ import crypto from "crypto";
 import { sendVerificationEmail } from "../utils/sendEmail.js";
 import UserService from "../models/UserService.js";
 
+// Failed logins allowed before the account locks, and how long it stays locked.
+const MAX_FAILED_LOGINS = 5;
+const LOCK_DURATION_MS = 30 * 60 * 1000;
+
 // ------------------ REGISTER ------------------
 export const register = async (req, res) => {
   try {
@@ -75,17 +79,26 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    if (user.lockUntil && user.lockUntil > Date.now()) {
+    // An expired lock is cleared so the next failure starts a fresh count,
+    // rather than re-locking immediately on a single mistake.
+    if (user.lockUntil && user.lockUntil.getTime() <= Date.now()) {
+      user.failedLoginAttempts = 0;
+      user.lockUntil = null;
+      await user.save();
+    }
+
+    if (user.lockUntil && user.lockUntil.getTime() > Date.now()) {
+      const minutesLeft = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
       return res.status(403).json({
-        message: "Account temporarily locked due to too many failed attempts. Please try again later.",
+        message: `Account temporarily locked due to too many failed attempts. Try again in ${minutesLeft} minute${minutesLeft === 1 ? "" : "s"}.`,
       });
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
-      if (user.failedLoginAttempts >= 5) {
-        user.lockUntil = Date.now() + 30 * 60 * 1000;
+      if (user.failedLoginAttempts >= MAX_FAILED_LOGINS) {
+        user.lockUntil = new Date(Date.now() + LOCK_DURATION_MS);
       }
       await user.save();
       return res.status(401).json({ message: "Invalid credentials" });

@@ -8,6 +8,12 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     isVerified: { type: Boolean, default: false },
+
+    // Brute-force protection: incremented on each failed login, cleared on
+    // success. lockUntil holds the timestamp the account unlocks at.
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date, default: null },
+
     verificationToken: { type: String },
     verificationTokenExpires: { type: Date },
     stripeCustomerId: { type: String, default: null },
