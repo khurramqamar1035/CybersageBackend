@@ -1,8 +1,7 @@
 import express from "express";
 import { adminLogin } from "../controllers/admincontroller.js";
 import { adminLoginValidator } from "../validators/adminschema.js";
-import { validate }  from "../middlewares/validate.js";
-import { verifyAdmin } from "../middlewares/verifyadmin.js";
+import { validateRequest } from "../middlewares/validateRequest.js";
 import { adminOnly } from "../middlewares/authMiddleware.js";
 import { adminLoginLimiter } from "../middlewares/rateLimiter.js";
 import {
@@ -31,10 +30,10 @@ router.put("/payments/:userServiceId", adminOnly, updatePaymentStatus);
 
 
 // Public login route — rate limited (5 attempts / 15 min per IP)
-router.post("/login", adminLoginLimiter, adminLoginValidator, validate, adminLogin);
+router.post("/login", adminLoginLimiter, adminLoginValidator, validateRequest, adminLogin);
 
 // Example protected route
-router.post("/create-post", verifyAdmin, (req, res) => {
+router.post("/create-post", adminOnly, (req, res) => {
   res.json({ message: "Admin created a post successfully!" });
 });
 

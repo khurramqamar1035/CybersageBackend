@@ -24,10 +24,10 @@ export const registerLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-/* ── Admin login — per IP, 5 attempts / 15 min (stricter) ── */
+/* ── Admin login — per IP, 20 attempts / 15 min ── */
 export const adminLoginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 20,
   keyGenerator: (req) => ipKeyGenerator(req),
   message: { message: "Too many admin login attempts. Please try again in 15 minutes." },
   skip: () => isDev,
@@ -35,10 +35,10 @@ export const adminLoginLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-/* ── Public write endpoints (contact, intern apply) — per IP, 10 / 30 min ── */
+/* ── Public write endpoints (contact, intern apply) — per IP, 30 / 30 min ── */
 export const publicWriteLimiter = rateLimit({
   windowMs: 30 * 60 * 1000,
-  max: 10,
+  max: 30,
   keyGenerator: (req) => ipKeyGenerator(req),
   message: { message: "Too many requests. Please slow down and try again later." },
   skip: () => isDev,
@@ -52,6 +52,31 @@ export const chatLimiter = rateLimit({
   max: 20,
   keyGenerator: (req) => ipKeyGenerator(req),
   message: { message: "Too many AI requests. Please wait a moment." },
+  skip: () => isDev,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/* ── Public read endpoints (blogs, FAQ, services, about, clients) ──
+   Generous: these are browsed normally by every visitor. This exists to
+   blunt scraping and accidental request loops, not to limit real users. */
+export const publicReadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  keyGenerator: (req) => ipKeyGenerator(req),
+  message: { message: "Too many requests. Please slow down and try again later." },
+  skip: () => isDev,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/* ── Authenticated app endpoints (dashboard, reports, my-services, billing) ──
+   Per IP; a signed-in user browsing their portal stays well under this. */
+export const appLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  keyGenerator: (req) => ipKeyGenerator(req),
+  message: { message: "Too many requests. Please slow down and try again later." },
   skip: () => isDev,
   standardHeaders: true,
   legacyHeaders: false,

@@ -1,8 +1,12 @@
 import express from "express";
 import { createClient, getClients, updateClient, deleteClient } from "../controllers/clientcontroller.js";
 import { adminOnly } from "../middlewares/authMiddleware.js";
+import { publicReadLimiter } from "../middlewares/rateLimiter.js";
 
 const router = express.Router();
+
+// Every route in this file is rate limited.
+router.use(publicReadLimiter);
 
 router.get("/", getClients);                        // Public — read
 router.post("/", adminOnly, createClient);          // Admin only

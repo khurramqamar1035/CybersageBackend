@@ -258,6 +258,31 @@ export const updateInternStatus = async (req, res) => {
   }
 };
 
+// ─── Accepted applicants — name + email list ──────────────────────────────────
+export const getAcceptedInterns = async (req, res) => {
+  try {
+    const interns = await Intern.find({ status: "accepted" })
+      .select("name email -_id")
+      .sort({ statusUpdatedAt: -1 });
+    res.json(interns);
+  } catch {
+    res.status(500).json({ error: "Failed to fetch accepted applicants." });
+  }
+};
+
+// ─── Accepted applicants — emails only ───────────────────────────────────────
+export const getAcceptedInternEmails = async (req, res) => {
+  try {
+    const interns = await Intern.find({ status: "accepted" })
+      .select("email -_id")
+      .sort({ statusUpdatedAt: -1 });
+    const emails = interns.map((i) => i.email);
+    res.json({ emails });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch accepted applicant emails." });
+  }
+};
+
 export const deleteIntern = async (req, res) => {
   try {
     const intern = await Intern.findOneAndDelete({ id: req.params.id });
