@@ -121,9 +121,17 @@ app.use("/api/auth", authRoutes);
 /* ================================
    OPENAI CLIENT
 ================================ */
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Built on first use, not at import time. The OpenAI SDK throws when the key is
+// missing, which previously took the whole server down on boot and made every
+// endpoint — login included — unreachable because of one unset chat key.
+let openaiClient = null;
+const getOpenAI = () => {
+  if (!process.env.OPENAI_API_KEY) return null;
+  if (!openaiClient) {
+    openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return openaiClient;
+};
 
 /* ================================
    RESEND CLIENT
@@ -146,6 +154,11 @@ app.post("/api/chat", chatLimiter, async (req, res) => {
           "🔒 You've reached the free AI limit.\n\nClick below to contact our team.",
         limitReached: true,
       });
+    }
+
+    const openai = getOpenAI();
+    if (!openai) {
+      return res.status(503).json({ error: "AI chat is not configured right now." });
     }
 
     const completion = await openai.chat.completions.create({
